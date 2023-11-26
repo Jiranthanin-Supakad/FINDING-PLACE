@@ -1,0 +1,48 @@
+{% extends "homepage/base.html" %}
+{% block content %}
+<div class="column is-4 is-offset-4">
+ <h3 class="title" style="color: rgb(39, 28, 28);">Sign Up</h3>
+ <div class="box">
+   {% with messages = get_flashed_messages() %}
+   {% if messages %}
+   <div class="notification is-danger">
+     {{ messages[0] }}. Go to <a href="{{ url_for('homepage_login') }}">Login page</a>.
+   </div>
+   {% endif %}
+   {% endwith %}
+   <form method="POST">
+    <div class="field">
+      <div href="#" class="logo"><i class='bx bxs-map-pin' style="font-size:36px" ></i><span>FindingPlace</span></div>
+      <div class="control">
+        <label class="label has-text-left">Email</label>
+        <p class="control has-icons-left has-icons-right">
+          <input class="input is-large" type="email" name="email" placeholder="Your Email" autofocus="" required> 
+          <span class="icon is-small is-left"> <i class="fa fa-envelope"></i> </span>
+        </p>
+      </div>
+    </div>
+    <div class="field">
+      <div class="control">
+        <label class="label has-text-left">Name</label>
+        <p class="control has-icons-left has-icons-right">
+          <input class="input is-large" type="text" name="name" placeholder="Name" autofocus="" required>
+          <span class="icon is-small is-left"> <i class="fa fa-address-book"></i> </span>
+        </p>
+      </div>
+    </div>
+    <div class="field">
+      <div class="control">
+        <label class="label has-text-left">Password</label>
+        <p class="control has-icons-left">
+          <input class="input is-large" type="password" name="password" placeholder="Your Password" required>
+          <span class="icon is-small is-left"> <i class="fa fa-lock"></i> </span>
+        </p>
+      </div>
+    </div>
+    <button class="button is-block is-info is-medium is-fullwidth has-text-white has-background-danger">Sign Up</button><br>
+    <a href="/google/" id="google is-medium is-fullwidth"><span>Sign Up with Google</span></a>
+  </form>
+  </div>
+ </div>
+</div>
+{% endblock %}

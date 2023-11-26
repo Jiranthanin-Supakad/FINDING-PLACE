@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1,
+            shrink-to-fit=no" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+    <!-- <link rel="stylesheet" href="static/css/open-iconic-bootstrap.css"> -->
+    <link rel="stylesheet" href="static/css/feedBox.css" />
+    <!-- <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css"> -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" />
+    <!-- or -->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css" />
+    <title>Finding app</title>
+</head>
+
+<body>
+    <!--ส่วนtab bar-->
+    <nav>
+        <div class="logo">
+            <a href="{{ url_for('finding_main') }}"><i class="bx bxs-map-pin"></i>Findingplace</a>
+        </div>
+        <div class="main">
+            <div class="search">
+                <input class="form-control" id="nav-search" type="search" placeholder="Search here..."
+                    onkeyup="search()" />
+            </div>
+            <div class="nav-bar">
+                <li>
+                    <a href="{{ url_for('finding_discovery') }}"><i class="ri-compass-3-fill"></i> Discovery</a>
+                </li>
+                <div class="category-title" id="Pet" hidden="">
+                    <a href="javascript:void(0)"><i class="bx bxs-dog"></i> Pets</a>
+                </div>
+                <div class="category-title" id="Item" hidden="">
+                    <a href="javascript:void(0)"><i class="ri-remote-control-2-fill"></i> Items</a>
+                </div>
+                {% if not current_user.is_authenticated %}
+                <li>
+                    <a href="{{ url_for('homepage_login') }}"><i class="ri-login-box-fill"></i> Login</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('homepage_signup') }}"><i class="bx bxs-registered"></i> Register</a>
+                </li>
+                {% else %}
+                <div class="category-title" id="profile">
+                    <img src="{{ current_user.avatar_url }}" class="rounded-circle"> &nbsp;
+                </div>
+                <div class="category-title" id="logout">
+                    <a href="{{ url_for('homepage_logout') }}"><i class='bx bxs-log-out'></i> Logout</a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="bx bx-menu" id="menu-icon"></div>
+        </div>
+    </nav>
+
+    <!--ส่วน กรอง IDPet-->
+    <div class="container">
+        <div class="fitterIDPet">
+            <button type="button" id="foundPet" class="found">ตามหาเจ้าของ</button>
+            <button type="button" id="petLost" class="petlost">สัตว์สูญหาย</button>
+            <button type="button" id="itemLost" class="itemlost">สิ่งของสูญหาย</button>
+        </div>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="notification is-danger" style="color: red;">
+            {{ messages[0] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+    <!--ส่วน post popup box-->
+    <div class="container">
+        <div class="popup-box">
+            <form id="upload" method="POST" action="/finding_discovery" enctype="multipart/form-data">
+                <!-- <div class="ri-close-circle-line" id="close-icon"></div> -->
+                <label for="filenameIMG" hidden="">filenameIMG:</label>
+                <input type="text" id="filenameIMG" name="filenameIMG" value="NoPic" hidden="" /><br>
+                <label for="name" hidden="">Name:</label>
+                <input type="text" id="name" name="name" maxlength="50" value="{{ current_user.name }}" hidden=""
+                    required />
+                <label for="email" hidden="">Email:</label>
+                <input type="email" id="email" name="email" maxlength="50" value="{{ current_user.email }}" hidden=""
+                    required />
+                <fieldset>
+                    <label for="idPet">ประกาศ </label>
+                    <input type="radio" name="idPet" id="foundPet" value="ตามหาเจ้าของ" required> ตามหาเจ้าของ </input>
+                    <input type="radio" name="idPet" id="petLost" value="สัตว์สูญหาย" required> สัตว์สูญหาย</input>
+                    <input type="radio" name="idPet" id="itemLost" value="สิ่งของสูญหาย" required> สิ่งของสูญหาย</input>
+                </fieldset>
+                <fieldset>
+                    <label for="category">Category / ประเภท</label>
+                    <input type="radio" name="category" id="r1" value="Pet" data-item="Pet" required> Pets </input>
+                    <input type="radio" name="category" id="r2" value="Item" data-item="Item" required> Items </input>
+                </fieldset>
+                <label for="detail">Detail / รายละเอียด</label>
+                <input type="text2" id="details" class="details" name="detail" placeholder="Please enter your detail..."
+                    maxlength="280" required />
+                <br />
+                <label for="subdist">ตำบล/แขวง</label>
+                <input type="text" id="subdist" name="subdist" placeholder="กรุณากรอกตำบล/แขวง" required />
+                <br />
+                <label for="district">อำเภอ/เขต</label>
+                <input type="text" id="district" name="district" placeholder="กรุณากรอกอำเภอ/เขต" required />
+                <br />
+                <label for="province">จังหวัด</label>
+                <input type="text" id="province" name="province" placeholder="กรุณากรอกจังหวัด" required />
+                <br />
+                <label for="tele">Contacts</label>
+                <input type="tel" id="tel" name="tel" placeholder="Please enter your tel..." maxlength="10" required />
+                <br />
+                <label for="photo">Photo / รูปภาพ</label>
+                <input type="file" name="file" class="file-control" autocomplete="off" required>
+                <div class="controlOP">
+                    <input type="hidden" id="entryid" name="id" value="" />
+                    <input type="submit" id="post" name="submit" value="Upload" />
+                    <button id="clear_form" type="button">Clear</button>
+                    <button id="cancel_form" type="button">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!--ส่วนของfeed ข่าว-->
+    <div id="contact_display"></div>
+    <div class="footer navbar-fixed-bottom">
+        <div class="footer">
+            <p style="margin-top: -40px;">Copyright 2023</p>
+        </div>
+    </div>
+</body>
+
+<!-- Optional JavaScript -->
+<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+<script>
+    let menu = document.querySelector("#menu-icon");
+    let navbar = document.querySelector(".nav-bar");
+    let userEmail = document.querySelector("#email");
+
+    $(document).ready(function () {
+        (function () {
+            $.getJSON("finding/blog", populate_container);
+        })();
+    });
+
+    let data_user = [];
+
+    $.getJSON("/finding/user", function (Array_data_user) {
+        Array_data_user.forEach(element => {
+            let dict = {};
+            dict['avatar_url'] = element.avatar_url;
+            dict['email'] = element.email;
+            dict['id'] = element.id;
+            dict['name'] = element.name;
+            dict['password'] = element.password;
+            dict['message'] = element.message;
+            data_user.push(dict);
+        });
+    });
+
+    function populate_container(blogentry_data) {
+        const data = { data: blogentry_data };
+        var Createblog = ({
+            date_created,
+            date_updated,
+            detail,
+            email,
+            id,
+            idPet,
+            category,
+            subdist,
+            district,
+            province,
+            name,
+            tel,
+            filenameIMG,
+            owner_id
+        }) => {
+            const db_datetimecreate = new Date(date_created + " UTC").toLocaleString("en-GB");
+            const db_datetimeupdate = new Date(date_updated + " UTC").toLocaleString("en-GB");
+
+            var image = "";
+            var nameuser = "";
+            var emailuser = "";
+            for (let i = 0; i < data_user.length; i++) {
+                if (owner_id == data_user[i].id) {
+                    image = data_user[i].avatar_url;
+                    nameuser = data_user[i].name;
+                    emailuser = data_user[i].email;
+                    break;
+                }
+            }
+            let postboxHtml = `
+            <div class="feedpost">
+                    <div class="row">
+                        <div class="col-md-1">
+                            <img class="tw-user-medium rounded-circle profile" src="${image}"> &nbsp;
+                        </div>
+                        <div class="col-md-11">
+                            <div class="row tweet-info">
+                                <span class="name" id="${id}name">${nameuser}</span> &nbsp;
+                                <span class="email text-muted" id="${id}email">${emailuser}</span> &nbsp;
+                            </div>
+                            <div class="row tweet-info">
+                            <span class="idpet" id="${id}idPet" data-item="${idPet}"> ประกาศ : ${idPet} !!! </span> &nbsp;
+                            </div>
+                            <div class="row tweet-info">
+                                <span class="details" id="${id}detail">${detail}</span> &nbsp;
+                            </div>
+                        </div>
+                        <div class="col-md-11">
+                            <div class="row tweet-info">
+                                <span class="photo"><img src="static/uploads/${filenameIMG}"></span> &nbsp;
+                            </div>
+                            <div class="row tweet-info">
+                                <span class="location" id="${id}location">Location : ${subdist} ${district} ${province}</span> &nbsp;
+                            </div>
+                            <div class="row tweet-info">
+                                <div class="${category}">
+                                <span class="category" id="${id}category" data-item="${category}">Category : ${category}</span>  &nbsp;
+                                </div>
+                            </div>
+                            <div class="row tweet-info">
+                                <span class="tel" id="${id}tel">Contacts : ${tel}</span> &nbsp;
+                            </div>
+                            <div class="row tweet-info">
+                                <span class="date_created text-muted">Date-created : ${db_datetimecreate}</span> &nbsp;
+                            </div>
+                            <div class="row tweet-info">
+                              <span class="date_created text-muted">Date-update : ${db_datetimeupdate}</span> &nbsp;
+                            </div>
+                        </div>
+                        <div class="row text-muted">
+                            <div class="edit-btn">
+                <button id="edit" type="edit_btn" value="${id}" onclick="prePopulateForm(this.value)"><i class='bx bx-edit-alt'></i></button>
+            </div>
+            <diV class="delete-btn">
+                <button id="remove" type="button1" value="${id}" onclick="removeItem(this.value)"><i class='bx bx-message-alt-x'></i></button>
+            </div>
+                        </div>
+                    </div>
+                </div> `;
+
+            if (emailuser !== "{{ current_user.email }}") {
+                postboxHtml = "";
+            }
+
+            return `
+            <div class="container">
+                ${postboxHtml}
+            </div> `;
+        };
+
+        let blog = data.data.map(Createblog);
+        blog.forEach((blog) => {
+            document.getElementById("contact_display").innerHTML =
+                blog + document.getElementById("contact_display").innerHTML;
+        });
+    }
+
+    function refresh_feed(blogentry_data) {
+        document.getElementById("contact_display").innerHTML = "";
+        document
+            .getElementById("contact_display")
+            .addEventListener("load", populate_container(blogentry_data));
+    }
+
+    $("#upload").submit(function (event) {
+        // prevent default html form submission action
+        $.post(url, formData, function (id) {
+            refresh_feed(id);
+        });
+        clearForm();
+        $(".popup-box").hide();
+        $("#contact_display").show();
+    });
+
+    function prePopulateForm(row) {
+        $.getJSON("finding/blog", function (blogentry_data) {
+            blogentry_data.forEach(function (i) {
+                if (i.id == row) {
+                    $("#upload")[0].reset();
+                    $("#name").val(i.name);
+                    $("#email").val(i.email);
+                    $("#category").val(i.category);
+                    $("#idPet").val(i.idPet);
+                    $("#details").val(i.detail);
+                    $("#subdist").val(i.subdist);
+                    $("#district").val(i.district);
+                    $("#province").val(i.province);
+                    $("#filenameIMG").val(i.filenameIMG);
+                    $("#tel").val(i.tel);
+                    $("#entryid").val(row);
+                }
+            });
+        });
+        $(".popup-box").show();
+        $("#contact_display").hide();
+        $(".fitterIDPet").hide();
+    }
+
+    function removeItem(row) {
+        if (!confirm("Delete" + ' post ' + row + "?")) {
+            return false;
+        }
+        var url = "finding/remove_blog";
+        var formData = { id: row };
+        $.post(url, formData, function (id) {
+            refresh_feed(id);
+        });
+    }
+
+    $(document).ready(function () {
+        $(".popup-box").hide();
+        $(".postbox").click(function () {
+            $(".popup-box").css({
+                opacity: "1","pointer-events": "auto",
+            }
+            );
+            $("#upload")[0].reset();
+            $(".popup-box").show();
+            $("#contact_display").hide();
+        });
+    });
+
+    $("#close-icon").click(function () {
+        $(".popup-box").hide();
+        $("#contact_display").show();
+        clearForm();
+    });
+
+    menu.onclick = () => {
+        menu.classList.toggle("bx-x");
+        navbar.classList.toggle("open");
+    };
+    function clearForm() {
+        $("#upload")[0].reset();
+        $("#entryid").val("");
+    }
+
+    $("#clear_form").click(function () {
+        clearForm();
+    });
+
+    $("#cancel_form").click(function () {
+        $(".popup-box").hide();
+        $("#contact_display").show();
+        clearForm();
+    });
+
+    const petPostsLink = document.getElementById("Pet");
+    petPostsLink.addEventListener("click", () => {
+        $(".postbox").hide();
+        filterBlogEntries_pet("Pet");
+        $("#petLost").show();
+        $("#itemLost").hide();
+        const foundpetPosts = document.getElementById("foundPet");
+        foundpetPosts.addEventListener("click", () => {
+            filterfoundBlogEntries_pet("ตามหาเจ้าของ", "Pet")
+        });
+    });
+
+    petPostsLink.addEventListener("dbclick", () => {
+        const blogEntries = document.querySelectorAll(".feedpost");
+        blogEntries.style.display = "none";
+    });
+
+    const itemPostsLink = document.getElementById("Item");
+    itemPostsLink.addEventListener("click", () => {
+        $(".postbox").hide();
+        filterBlogEntries_item("Item");
+        $("#petLost").hide();
+        $("#itemLost").show();
+        const founditemPosts = document.getElementById("foundPet");
+        founditemPosts.addEventListener("click", () => {
+            filterfoundBlogEntries_item("ตามหาเจ้าของ", "Item")
+        });
+    });
+
+    itemPostsLink.addEventListener("dbclick", () => {
+        const blogEntries = document.querySelectorAll(".feedpost");
+        blogEntries.style.display = "none";
+    });
+
+
+    const foundpetPosts = document.getElementById("foundPet");
+    foundpetPosts.addEventListener("click", () => {
+        filterfoundBlogEntries("ตามหาเจ้าของ");
+    });
+
+    const lostpetPosts = document.getElementById("petLost");
+    lostpetPosts.addEventListener("click", () => {
+        filterlostBlogEntries_pet("สัตว์สูญหาย");
+    });
+
+    const lostitemsPosts = document.getElementById("itemLost");
+    lostitemsPosts.addEventListener("click", () => {
+        filterlostBlogEntries_item("สิ่งของสูญหาย");
+    });
+
+    const filterBlogEntries_pet = (category) => {
+        const blogEntries = document.querySelectorAll(".feedpost");
+        for (let i = 0; i < blogEntries.length; i++) {
+            const blogEntry = blogEntries[i];
+            const categorySpan = blogEntry.querySelector(".category");
+            if (categorySpan && categorySpan.dataset.item === category) {
+                blogEntry.style.display = "block";
+            } else {
+                blogEntry.style.display = "none";
+            }
+        }
+    };
+
+    const filterBlogEntries_item = (category) => {
+        const blogEntries = document.querySelectorAll(".feedpost");
+        for (let i = 0; i < blogEntries.length; i++) {
+            const blogEntry = blogEntries[i];
+            const categorySpan = blogEntry.querySelector(".category");
+            if (categorySpan && categorySpan.dataset.item === category) {
+                blogEntry.style.display = "block";
+            } else {
+                blogEntry.style.display = "none";
+            }
+        }
+    };
+
+    const filterfoundBlogEntries = (idPet) => {
+        const blogEntries = document.querySelectorAll(".feedpost");
+        for (let i = 0; i < blogEntries.length; i++) {
+            const blogEntry = blogEntries[i];
+            const FoundcategorySpan = blogEntry.querySelector(".idpet");
+            if (FoundcategorySpan && FoundcategorySpan.dataset.item === idPet) {
+                blogEntry.style.display = "block";
+            } else {
+                blogEntry.style.display = "none";
+            }
+        }
+    };
+
+    const filterfoundBlogEntries_pet = (idPet, category) => {
+        const blogEntries = document.querySelectorAll(".feedpost");
+        for (let i = 0; i < blogEntries.length; i++) {
+            const blogEntry = blogEntries[i];
+            const FoundcategorySpan = blogEntry.querySelector(".idpet");
+            const categorySpan = blogEntry.querySelector(".category");
+            if ((FoundcategorySpan && FoundcategorySpan.dataset.item === "ตามหาเจ้าของ") && (categorySpan && categorySpan.dataset.item === "Pet")) {
+                blogEntry.style.display = "block";
+            } else {
+                blogEntry.style.display = "none";
+            }
+        }
+    };
+
+    const filterfoundBlogEntries_item = (idPet, category) => {
+        const blogEntries = document.querySelectorAll(".feedpost");
+        for (let i = 0; i < blogEntries.length; i++) {
+            const blogEntry = blogEntries[i];
+            const FoundcategorySpan = blogEntry.querySelector(".idpet");
+            const categorySpan = blogEntry.querySelector(".category");
+            if ((FoundcategorySpan && FoundcategorySpan.dataset.item === "ตามหาเจ้าของ") && (categorySpan && categorySpan.dataset.item === "Item")) {
+                blogEntry.style.display = "block";
+            } else {
+                blogEntry.style.display = "none";
+            }
+        }
+    };
+
+    const filterlostBlogEntries_pet = (idPet) => {
+        const blogEntries = document.querySelectorAll(".feedpost");
+        for (let i = 0; i < blogEntries.length; i++) {
+            const blogEntry = blogEntries[i];
+            const LostcategorySpan = blogEntry.querySelector(".idpet");
+            if (LostcategorySpan && LostcategorySpan.dataset.item === idPet) {
+                blogEntry.style.display = "block";
+            } else {
+                blogEntry.style.display = "none";
+            }
+        }
+    };
+
+
+    const filterlostBlogEntries_item = (idPet) => {
+        const blogEntries = document.querySelectorAll(".feedpost");
+        for (let i = 0; i < blogEntries.length; i++) {
+            const blogEntry = blogEntries[i];
+            const LostcategorySpan = blogEntry.querySelector(".idpet");
+            if (LostcategorySpan && LostcategorySpan.dataset.item === idPet) {
+                blogEntry.style.display = "block";
+            } else {
+                blogEntry.style.display = "none";
+            }
+        }
+    };
+
+    function search() {
+        let input = document.getElementById('nav-search').value
+        input = input.toLowerCase();
+        const blogEntries = document.querySelectorAll(".feedpost");
+
+        for (let i = 0; i < blogEntries.length; i++) {
+            const blogEntry = blogEntries[i];
+            if (!blogEntry.innerHTML.toLowerCase().includes(input)) {
+                blogEntry.style.display = "none";
+            }
+            else {
+                blogEntry.style.display = "block";
+            }
+        }
+    }
+
+</script>
+
+</html>

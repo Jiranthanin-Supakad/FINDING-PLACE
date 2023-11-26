@@ -1,0 +1,81 @@
+{% extends "homepage/base.html" %}
+{% block content %}
+<style>
+  .button {
+    display: inline-block;
+    margin-right: 10px;
+  }
+  .button, #google {
+      display: inline-block;
+      padding: 10px 125px;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      background-color: #dc3545;
+      cursor: pointer;
+      border-radius: 5px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  #google {
+      display: inline-flex;
+      align-items: center;
+  }
+  
+  #google img {
+      margin-right: 10px;
+  }
+</style>
+<div class="column is-4 is-offset-4">
+  <h3 class="title" style="color: rgb(39, 28, 28);">Login</h3>
+  <div class="box">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="notification is-danger">
+      {{ messages[0] }}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <form method="POST">
+
+      <div class="field">
+        <div href="#" class="logo"><i class='bx bxs-map-pin' style="font-size:36px" ></i><span>FindingPlace</span></div>
+        <div class="control">
+          <label class="label has-text-left">Email</label>
+          <p class="control has-icons-left has-icons-right">
+            <input class="input is-large" type="email" name="email" placeholder="Your Email" autofocus="" required>
+            <span class="icon is-small is-left"> <i class="fa fa-envelope"></i> </span>
+          </p>
+        </div>
+      </div>
+      <div class="field">
+        <div class="control">
+          <label class="label has-text-left">Password</label>
+          <p class="control has-icons-left">
+            <input class="input is-large" type="password" name="password" placeholder="Your Password" required>
+            <span class="icon is-small is-left"> <i class="fa fa-lock"></i> </span>
+          </p>
+        </div>
+      </div>
+      <div class="field">
+        <label class="checkbox">
+          <input type="checkbox" name="remember">
+          Remember me
+        </label>
+      </div>  
+      <div>     
+        <button class="button is-block is-info is-medium is-fullwidth has-text-white has-background-danger"><span>Login</span></button>
+        <br>
+        <span>Don't have an account yet?   </span><a href="/homepage/signup" style="color: blue;">  Sign up</a>
+        <br>
+        <br>
+        <a href="/google/" id="google is-medium is-fullwidth"><span>Login with Google</span></a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
